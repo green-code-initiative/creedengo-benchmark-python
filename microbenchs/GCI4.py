@@ -1,5 +1,7 @@
 
 import time
+import pyperf
+from helpers import *
 
 # Déclaration de la variable globale
 global_counter = 0
@@ -18,22 +20,22 @@ def increment_local(n):
         local_counter += 1
     return local_counter
 
-
-# Fonction pour mesurer le temps d'exécution
-def measure_time(fct,n):
-    start_time = time.time()
-    func= globals()[fct]
-    func(n)
-    end_time = time.time()
-    return end_time - start_time
-
 # Comparaison des performances
-increments = [10, 1000, 1000000 ]
-for inc in increments:
-    elapsed_time = measure_time('increment_global',inc)
-    print(f" Non_Compliant : {inc}, elapsed time : {elapsed_time:.6f} secondes")
-    elapsed_time = measure_time('increment_local',inc)
-    print(f"Compliant : {inc}, elapsed time: {elapsed_time:.6f} secondes")
+def main():
+    runner = pyperf.Runner()
+    benchmarks = []
+    increments = [10, 1_000, 1_000_000]
+    for inc in increments:
+         func_args = inc
+         res = runner.bench_func(f"global{inc}", increment_global, func_args)
+         if res:
+            benchmarks.append(res)
+         res = runner.bench_func(f"local{inc}", increment_local, func_args)
+         if res:
+            benchmarks.append(res)
+    suite = pyperf.BenchmarkSuite(benchmarks)
+    save_bench_result(suite)
+    
+    
+main()
 
-
-   
